@@ -55,9 +55,65 @@ services:
     depends_on:
       - tour_web
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring_net
+      - frontend_net
+      - backend_net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - monitoring_net
+    depends_on:
+      - prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring_net
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_db:5432/${POSTGRES_DB}?sslmode=disable"
+    networks:
+      - backend_net
+      - monitoring_net
+    depends_on:
+      - postgres_db
+
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter
+    command:
+      - -nginx.scrape-uri=http://nginx_proxy:80/nginx_status
+    networks:
+      - frontend_net
+      - monitoring_net
+    depends_on:
+      - nginx_proxy
+
 networks:
   frontend_net:
   backend_net:
+  monitoring_net:
 
 volumes:
   postgres_data:
