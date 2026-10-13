@@ -1,6 +1,6 @@
 # Đề tài 20: Hệ thống Booking Tour / Du lịch
 
-**Sinh viên thực hiện**: [Điền tên của bạn vào đây] - MSSV: DTC245200547
+**Sinh viên thực hiện**: [Lương Thế Mạnh] - MSSV: DTC245200547
 
 ---
 
